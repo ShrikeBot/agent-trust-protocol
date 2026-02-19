@@ -93,6 +93,8 @@ Final ──→ Replaced (by a new AIP)
 
 This ensures that Final AIPs are stable references. Implementations targeting a specific AIP number get deterministic behavior.
 
+A versioned ATP specification (e.g., ATP v1.0) SHALL only reference AIPs with **Final** status. Draft and Review AIPs may be works in progress, but they are not part of a published protocol version until finalised.
+
 ### Versioning
 
 Individual AIPs are NOT versioned. The git history serves as the revision record. The protocol version is defined by two `"major.minor"` string fields in ATP documents: `v` (the protocol version the document was created under) and `cv` (the minimum compatible protocol version for verification). The domain separator is `ATP-v{M}:` where `M` is the major version component of `cv`. A verifier extracts the major component of `cv` and checks it against its own major version to determine if it can process the document. For v1.0, all documents have `v: "1.0"` and `cv: "1.0"`, and the domain separator is `ATP-v1:`.
