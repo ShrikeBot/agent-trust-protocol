@@ -349,6 +349,35 @@ A verifier checks `cv <= my_version` to determine if it can correctly process an
 
 This prevents cross-protocol signature reuse — a signature produced for an ATP document cannot be valid in any other protocol that does not use the identical prefix. Cross-type reuse within ATP is already prevented by the `t` field being included in the signed payload — different document types produce different bytes.
 
+#### 4.5 Document Versioning
+
+ATP documents carry two version fields:
+
+- **`v`** (protocol version): The protocol version under which this document was created. Indicates the full set of rules and semantics the creator intended.
+- **`cv`** (compatible version): The oldest protocol version whose verification rules can correctly process this document. This is the backwards-compatibility declaration.
+
+##### How verifiers use these fields
+
+1. Read `cv` from the document.
+2. If `cv > verifier_version`, the verifier MUST reject the document — it requires a newer protocol version.
+3. If `cv <= verifier_version`, the verifier can process the document using its own verification rules.
+4. The domain separator for signature verification is `ATP-v{cv}:` — derived from the compatible version, not the protocol version.
+
+##### Why two fields?
+
+When a new major protocol version ships, not all document types change. An identity document may be structurally identical between v1 and v2, while receipts gain new required fields. In this case:
+
+- A v2 identity document would have `v: 2, cv: 1` — a v1 verifier can process it.
+- A v2 receipt would have `v: 2, cv: 2` — a v1 verifier must skip it.
+
+This avoids unnecessary breakage. A v1 explorer continues to process documents it understands, without needing a full v2 upgrade.
+
+##### Rules
+
+- `cv` MUST be less than or equal to `v`.
+- `cv` MUST NOT be less than 1.
+- For ATP v1.0, all documents have `v: 1` and `cv: 1`.
+
 ### 5. Encoding
 
 Documents MAY be encoded as JSON (RFC 8259) or CBOR (RFC 8949).
@@ -502,7 +531,7 @@ flowchart TD
 ```
 
 1. Decode document (JSON or CBOR based on content-type)
-2. Verify `v` and `cv` are valid integers and `cv <= v`. For v1 documents, `v` is `1` and `cv` is `1`. Verify `t` is `"id"`.
+2. Verify `v` and `cv` are valid integers, `cv >= 1`, and `cv <= v`. If `cv > verifier_version`, reject (§4.5). For v1 documents, `v` is `1` and `cv` is `1`. Verify `t` is `"id"`.
 3. Verify `k` is an array with at least one key object. Verify no duplicate public keys.
 4. Compute the identity fingerprint from `k[0].p` per §2.3
 5. Find the key in `k` whose fingerprint matches `s.f`. Reject if no match.
