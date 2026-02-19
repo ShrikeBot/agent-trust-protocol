@@ -28,8 +28,8 @@ Replaces an existing identity with a new one. The supersession document IS the n
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"super"` | Document type |
 | `target` | identity-ref | — | Identity being superseded (`f` + `ref`) |
 | `n` | string | 1–64 chars, `[a-zA-Z0-9 _\-.]` | New agent name (AIP-01 §1.1) |
@@ -128,8 +128,8 @@ An identity can carry keys forward across supersessions (e.g., keeping the same 
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -171,8 +171,8 @@ An identity can carry keys forward across supersessions (e.g., keeping the same 
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -212,8 +212,8 @@ In this example, the Ed25519 key is carried forward into the new identity (same 
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -341,8 +341,8 @@ type SupersessionReason =
 
 /** Supersession document — also serves as the new identity */
 interface SupersessionDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "super";
   /** Identity being superseded */
   target: IdentityRef;

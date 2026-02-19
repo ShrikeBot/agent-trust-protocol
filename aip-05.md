@@ -33,8 +33,8 @@ One agent vouching for another.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"att"` | Document type |
 | `from` | identity-ref | — | Attestor identity reference (AIP-01 §6) |
 | `to` | identity-ref | — | Attestee identity reference (AIP-01 §6) |
@@ -87,8 +87,8 @@ Revokes a previously issued attestation.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"att-revoke"` | Document type |
 | `ref` | location-ref | — | Location reference to attestation being revoked (`net` + `id`) |
 | `reason` | string | see §2.1 | Reason |
@@ -126,8 +126,8 @@ Explorers SHOULD distinguish between expired and revoked attestations when displ
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "att",
   "from": {
     "f": "moltbook-platform-fingerprint",
@@ -155,8 +155,8 @@ Explorers SHOULD distinguish between expired and revoked attestations when displ
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "att",
   "from": {
     "f": "aBtxA94XweOEmkvNbrfw-KGbLA1OX2p7jJ0OHyoLTF0",
@@ -187,8 +187,8 @@ This endorsement expires on 2026-01-01 (Unix timestamp 1767225600).
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "att-revoke",
   "ref": {
     "net": "bip122:000000000019d6689c085ae165831e93",
@@ -317,8 +317,8 @@ interface IdentityRef {
 
 /** Attestation document */
 interface AttestationDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "att";
   /** Attestor identity reference */
   from: IdentityRef;
@@ -336,8 +336,8 @@ type AttestationRevocationReason = "retracted" | "fraudulent" | "expired" | "err
 
 /** Attestation revocation document */
 interface AttestationRevocationDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "att-revoke";
   /** Location reference to the attestation being revoked */
   ref: LocationRef;

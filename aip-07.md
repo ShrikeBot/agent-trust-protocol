@@ -28,8 +28,8 @@ A lightweight signed document proving liveness.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"hb"` | Document type |
 | `f` | binary | — | Identity fingerprint (`k[0]` fingerprint) |
 | `ref` | location-ref | — | Location reference to signer's identity |
@@ -88,8 +88,8 @@ Explorers MAY accept off-chain heartbeats via API submission and cache them for 
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "hb",
   "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
   "ref": {
@@ -108,8 +108,8 @@ Explorers MAY accept off-chain heartbeats via API submission and cache them for 
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "hb",
   "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
   "ref": {
@@ -214,8 +214,8 @@ Third-party services MAY implement dead man's switches using heartbeat absence a
 ```typescript
 /** Heartbeat document */
 interface HeartbeatDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "hb";
   /** Identity fingerprint (k[0] fingerprint) */
   f: Uint8Array;

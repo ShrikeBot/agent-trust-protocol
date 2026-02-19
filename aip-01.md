@@ -95,7 +95,7 @@ This ensures that Final AIPs are stable references. Implementations targeting a 
 
 ### Versioning
 
-Individual AIPs are NOT versioned. The git history serves as the revision record. The protocol version is defined by two integer fields in ATP documents: `v` (the protocol version the document was created under) and `cv` (the minimum compatible protocol version for verification). The domain separator uses `cv`: `ATP-v{cv}:`. A verifier checks `cv <= my_version` to determine if it can process the document. For v1.0, all documents have `v: 1` and `cv: 1`, and the domain separator is `ATP-v1:`.
+Individual AIPs are NOT versioned. The git history serves as the revision record. The protocol version is defined by two `"major.minor"` string fields in ATP documents: `v` (the protocol version the document was created under) and `cv` (the minimum compatible protocol version for verification). The domain separator is `ATP-v{M}:` where `M` is the major version component of `cv`. A verifier extracts the major component of `cv` and checks it against its own major version to determine if it can process the document. For v1.0, all documents have `v: "1.0"` and `cv: "1.0"`, and the domain separator is `ATP-v1:`.
 
 ### Normative Language
 
@@ -125,8 +125,8 @@ An identity document establishes an agent's cryptographic identity.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"id"` | Document type |
 | `n` | string | 1–64 chars, `[a-zA-Z0-9 _\-.]` | Agent name (§1.1) |
 | `k` | array | 1+ key objects, no duplicate public keys | Key set (§2) |
@@ -353,30 +353,32 @@ This prevents cross-protocol signature reuse — a signature produced for an ATP
 
 ATP documents carry two version fields:
 
-- **`v`** (protocol version): The protocol version under which this document was created. Indicates the full set of rules and semantics the creator intended.
-- **`cv`** (compatible version): The oldest protocol version whose verification rules can correctly process this document. This is the backwards-compatibility declaration.
+- **`v`** (protocol version): The protocol version under which this document was created, as a `"major.minor"` string (e.g., `"1.0"`, `"2.1"`). Indicates the full set of rules and semantics the creator intended.
+- **`cv`** (compatible version): The oldest protocol version whose verification rules can correctly process this document, as a `"major.minor"` string (e.g., `"1.0"`). This is the backwards-compatibility declaration.
 
 ##### How verifiers use these fields
 
-1. Read `cv` from the document.
-2. If `cv > verifier_version`, the verifier MUST reject the document — it requires a newer protocol version.
-3. If `cv <= verifier_version`, the verifier can process the document using its own verification rules.
-4. The domain separator for signature verification is `ATP-v{cv}:` — derived from the compatible version, not the protocol version.
+1. Read `cv` from the document and extract its major version component `M` (e.g., `"1.0"` → `1`).
+2. If `M > verifier_major_version`, the verifier MUST reject the document — it requires a newer protocol version.
+3. If `M <= verifier_major_version`, the verifier can process the document using its own verification rules.
+4. The domain separator is `ATP-v{M}:` where `M` is the major version component of the `cv` field — derived from the compatible version, not the protocol version.
 
 ##### Why two fields?
 
 When a new major protocol version ships, not all document types change. An identity document may be structurally identical between v1 and v2, while receipts gain new required fields. In this case:
 
-- A v2 identity document would have `v: 2, cv: 1` — a v1 verifier can process it.
-- A v2 receipt would have `v: 2, cv: 2` — a v1 verifier must skip it.
+- A v2 identity document would have `v: "2.0", cv: "1.0"` — a v1 verifier can process it.
+- A v2 receipt would have `v: "2.0", cv: "2.0"` — a v1 verifier must skip it.
 
 This avoids unnecessary breakage. A v1 explorer continues to process documents it understands, without needing a full v2 upgrade.
 
 ##### Rules
 
+- `v` and `cv` are strings in `"major.minor"` format (e.g., `"1.0"`, `"2.1"`). No patch version.
 - `cv` MUST be less than or equal to `v`.
-- `cv` MUST NOT be less than 1.
-- For ATP v1.0, all documents have `v: 1` and `cv: 1`.
+- The major component of `cv` MUST NOT be less than 1.
+- The domain separator uses the major version integer from `cv`: `ATP-v{M}:`.
+- For ATP v1.0, all documents have `v: "1.0"` and `cv: "1.0"`.
 
 ### 5. Encoding
 
@@ -405,7 +407,7 @@ Creators MUST sign canonical bytes. Inscriptions MAY contain non-canonical encod
 
 | Field | Type | JSON Encoding | CBOR Encoding |
 |-------|------|---------------|---------------|
-| `v`, `cv` | integer | number | unsigned integer (major type 0) |
+| `v`, `cv` | text | UTF-8 string | text string (major type 3) |
 | `t`, `n` | text | UTF-8 string | text string (major type 3) |
 | `vna` | integer | number | unsigned integer (major type 0) |
 | `k` | array | array of key objects | array of maps |
@@ -531,7 +533,7 @@ flowchart TD
 ```
 
 1. Decode document (JSON or CBOR based on content-type)
-2. Verify `v` and `cv` are valid integers, `cv >= 1`, and `cv <= v`. If `cv > verifier_version`, reject (§4.5). For v1 documents, `v` is `1` and `cv` is `1`. Verify `t` is `"id"`.
+2. Verify `v` and `cv` are valid major.minor strings (e.g., `"1.0"`), `cv >= "1.0"`, and `cv <= v`. If the major component of `cv` > verifier's major version, reject (§4.5). For v1 documents, `v` is `"1.0"` and `cv` is `"1.0"`. Verify `t` is `"id"`.
 3. Verify `k` is an array with at least one key object. Verify no duplicate public keys.
 4. Compute the identity fingerprint from `k[0].p` per §2.3
 5. Find the key in `k` whose fingerprint matches `s.f`. Reject if no match.
@@ -547,7 +549,7 @@ Verification procedures produce one of the following error categories when a doc
 | Error Code | Description |
 |------------|-------------|
 | `ERROR_MALFORMED_DOCUMENT` | JSON/CBOR parse failure |
-| `ERROR_INVALID_VERSION` | `v` or `cv` is not a valid integer, or `cv > v` |
+| `ERROR_INVALID_VERSION` | `v` or `cv` is not a valid major.minor string, or `cv > v` |
 | `ERROR_INVALID_TYPE` | `t` is not a recognized document type |
 | `ERROR_MISSING_FIELD` | A required field is absent |
 | `ERROR_INVALID_FIELD_TYPE` | Field value has wrong type (e.g., string where integer expected) |
@@ -564,8 +566,8 @@ Verification procedures produce one of the following error categories when a doc
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "id",
   "n": "Shrike",
   "k": [
@@ -603,8 +605,8 @@ Fingerprint (computed): `base64url_no_pad(sha256(decode_base64url(k[0].p)))` →
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "id",
   "n": "Shrike",
   "k": [
@@ -635,8 +637,8 @@ This identity holds two keys: an Ed25519 key (primary, defines the fingerprint) 
 
 ```
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "id",
   "n": "Shrike",
   "k": [
@@ -735,8 +737,8 @@ type Metadata = Record<string, [string, string][]>;
 
 /** Identity document */
 interface IdentityDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "id";
   /** Agent name (1–64 chars, [a-zA-Z0-9 _\-.]) */
   n: string;

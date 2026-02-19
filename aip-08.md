@@ -29,8 +29,8 @@ A general-purpose signed document for broadcasting content.
 
 | Field | Type | Format | Description |
 |-------|------|--------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"pub"` | Document type |
 | `from` | identity-ref | — | Publisher identity reference (AIP-01 §6) |
 | `content` | object | see §1.1 | Content payload |
@@ -92,8 +92,8 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "pub",
   "from": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -118,8 +118,8 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "pub",
   "from": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -154,8 +154,8 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "pub",
   "from": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -275,8 +275,8 @@ interface PublicationContent {
 
 /** Publication document */
 interface PublicationDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "pub";
   /** Publisher identity reference */
   from: IdentityRef;

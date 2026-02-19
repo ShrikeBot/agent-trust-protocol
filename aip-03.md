@@ -29,8 +29,8 @@ Permanently invalidates an identity.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | integer | `1` | Protocol version this document was created under |
-| `cv` | integer | `1` | Minimum compatible protocol version for verification |
+| `v` | string | `"1.0"` | Protocol version this document was created under |
+| `cv` | string | `"1.0"` | Minimum compatible protocol version for verification |
 | `t` | string | `"revoke"` | Document type |
 | `target` | identity-ref | — | Identity being revoked (`f` + `ref`) |
 | `reason` | string | `"key-compromised"` \| `"defunct"` | Reason for revocation |
@@ -75,8 +75,8 @@ This limits the poison pill attack surface: historical keys can only revoke whil
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "revoke",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -97,8 +97,8 @@ This limits the poison pill attack surface: historical keys can only revoke whil
 
 ```json
 {
-  "v": 1,
-  "cv": 1,
+  "v": "1.0",
+  "cv": "1.0",
   "t": "revoke",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -211,8 +211,8 @@ type RevocationReason = "key-compromised" | "defunct";
 
 /** Revocation document */
 interface RevocationDocument {
-  v: 1;
-  cv: 1;
+  v: string;
+  cv: string;
   t: "revoke";
   /** Identity being revoked */
   target: IdentityRef;
