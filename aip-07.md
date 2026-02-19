@@ -28,7 +28,8 @@ A lightweight signed document proving liveness.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"hb"` | Document type |
 | `f` | binary | — | Identity fingerprint (`k[0]` fingerprint) |
 | `ref` | location-ref | — | Location reference to signer's identity |
@@ -87,7 +88,8 @@ Explorers MAY accept off-chain heartbeats via API submission and cache them for 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "hb",
   "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
   "ref": {
@@ -106,7 +108,8 @@ Explorers MAY accept off-chain heartbeats via API submission and cache them for 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "hb",
   "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
   "ref": {
@@ -132,7 +135,7 @@ Explorers MAY accept off-chain heartbeats via API submission and cache them for 
 4. Verify the top-level `f` matches the identity's fingerprint (computed from identity's `k[0]`)
 5. Find a key in the identity's key set whose fingerprint matches `s.f`. Reject if no match.
 6. Remove `s` field, re-encode in canonical form (AIP-01 §5.2)
-7. Prepend domain separator `ATP-v1.0:` and verify `s.sig` using the matched key (AIP-01 §4.2, §4.4)
+7. Prepend domain separator `ATP-v{cv}:` (for v1 documents: `ATP-v1:`) and verify `s.sig` using the matched key (AIP-01 §4.2, §4.4)
 8. Verify `seq` is strictly greater than the highest previously observed `seq` for this identity fingerprint. Reject if equal or lower.
 
 ## Implementation Considerations
@@ -211,7 +214,8 @@ Third-party services MAY implement dead man's switches using heartbeat absence a
 ```typescript
 /** Heartbeat document */
 interface HeartbeatDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "hb";
   /** Identity fingerprint (k[0] fingerprint) */
   f: Uint8Array;

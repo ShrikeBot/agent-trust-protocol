@@ -28,7 +28,8 @@ Replaces an existing identity with a new one. The supersession document IS the n
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"super"` | Document type |
 | `target` | identity-ref | — | Identity being superseded (`f` + `ref`) |
 | `n` | string | 1–64 chars, `[a-zA-Z0-9 _\-.]` | New agent name (AIP-01 §1.1) |
@@ -127,7 +128,8 @@ An identity can carry keys forward across supersessions (e.g., keeping the same 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -169,7 +171,8 @@ An identity can carry keys forward across supersessions (e.g., keeping the same 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -209,7 +212,8 @@ In this example, the Ed25519 key is carried forward into the new identity (same 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -262,7 +266,7 @@ Same key, new name and metadata. Signatures are identical for deterministic algo
 9. For `s[0]` (old identity signature): find a key in the OLD key set whose fingerprint matches `s[0].f`. Reject if no match.
 10. For `s[1]` (new identity signature): find a key in the NEW key set whose fingerprint matches `s[1].f`. Reject if no match.
 11. Remove `s` field, re-encode in canonical form (AIP-01 §5.2)
-12. Prepend domain separator `ATP-v1.0:` and verify `s[0].sig` using the matched old key (AIP-01 §4.2, §4.4)
+12. Prepend domain separator `ATP-v{cv}:` (for v1 documents: `ATP-v1:`) and verify `s[0].sig` using the matched old key (AIP-01 §4.2, §4.4)
 13. Verify `s[1].sig` using the matched new key
 14. **Chain-state check:** Check that old identity has not been revoked BEFORE this supersession's block confirmation. If a revocation and supersession from the same identity appear in the same block, block position determines precedence: a revocation before the supersession invalidates the supersession; a revocation after the supersession is ignored (identity is already superseded).
 
@@ -337,7 +341,8 @@ type SupersessionReason =
 
 /** Supersession document — also serves as the new identity */
 interface SupersessionDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "super";
   /** Identity being superseded */
   target: IdentityRef;

@@ -33,7 +33,8 @@ One agent vouching for another.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"att"` | Document type |
 | `from` | identity-ref | — | Attestor identity reference (AIP-01 §6) |
 | `to` | identity-ref | — | Attestee identity reference (AIP-01 §6) |
@@ -86,7 +87,8 @@ Revokes a previously issued attestation.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"att-revoke"` | Document type |
 | `ref` | location-ref | — | Location reference to attestation being revoked (`net` + `id`) |
 | `reason` | string | see §2.1 | Reason |
@@ -124,7 +126,8 @@ Explorers SHOULD distinguish between expired and revoked attestations when displ
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "att",
   "from": {
     "f": "moltbook-platform-fingerprint",
@@ -152,7 +155,8 @@ Explorers SHOULD distinguish between expired and revoked attestations when displ
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "att",
   "from": {
     "f": "aBtxA94XweOEmkvNbrfw-KGbLA1OX2p7jJ0OHyoLTF0",
@@ -183,7 +187,8 @@ This endorsement expires on 2026-01-01 (Unix timestamp 1767225600).
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "att-revoke",
   "ref": {
     "net": "bip122:000000000019d6689c085ae165831e93",
@@ -208,7 +213,7 @@ This endorsement expires on 2026-01-01 (Unix timestamp 1767225600).
 5. Verify `to.f` matches the attestee's identity fingerprint (computed from attestee's `k[0]`)
 6. Find the key in the attestor's key set whose fingerprint matches `s.f`. Reject if no match.
 7. Remove `s` field, re-encode in canonical form (AIP-01 §5.2)
-8. Prepend domain separator `ATP-v1.0:` and verify `s.sig` using the matched public key (AIP-01 §4.2, §4.4)
+8. Prepend domain separator `ATP-v{cv}:` (for v1 documents: `ATP-v1:`) and verify `s.sig` using the matched public key (AIP-01 §4.2, §4.4)
 
 ### Attestation Revocation Verification Procedure
 
@@ -220,7 +225,7 @@ This endorsement expires on 2026-01-01 (Unix timestamp 1767225600).
 6. Resolve the attestor's latest identity in the supersession chain from `from.ref`
 7. Find a key in the attestor's current key set whose fingerprint matches `s.f`. Reject if no match.
 8. Remove `s` field, re-encode in canonical form (AIP-01 §5.2)
-9. Prepend domain separator `ATP-v1.0:` and verify `s.sig` using the matched key (AIP-01 §4.2, §4.4)
+9. Prepend domain separator `ATP-v{cv}:` (for v1 documents: `ATP-v1:`) and verify `s.sig` using the matched key (AIP-01 §4.2, §4.4)
 10. Once verified, the referenced attestation is no longer active
 
 Verifiers SHOULD check for attestation revocations before treating an attestation as active.
@@ -312,7 +317,8 @@ interface IdentityRef {
 
 /** Attestation document */
 interface AttestationDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "att";
   /** Attestor identity reference */
   from: IdentityRef;
@@ -330,7 +336,8 @@ type AttestationRevocationReason = "retracted" | "fraudulent" | "expired" | "err
 
 /** Attestation revocation document */
 interface AttestationRevocationDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "att-revoke";
   /** Location reference to the attestation being revoked */
   ref: LocationRef;

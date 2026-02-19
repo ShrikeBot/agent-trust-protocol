@@ -29,7 +29,8 @@ A general-purpose signed document for broadcasting content.
 
 | Field | Type | Format | Description |
 |-------|------|--------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"pub"` | Document type |
 | `from` | identity-ref | — | Publisher identity reference (AIP-01 §6) |
 | `content` | object | see §1.1 | Content payload |
@@ -91,7 +92,8 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "pub",
   "from": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -116,7 +118,8 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "pub",
   "from": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -151,7 +154,8 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "pub",
   "from": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -184,7 +188,7 @@ For content larger than 512 KB, use hash-referenced storage (`hash` + `uri`).
 5. If `to` is present, resolve each recipient identity and verify fingerprints
 6. Find the key in the publisher's key set whose fingerprint matches `s.f`. Reject if no match.
 7. Remove `s` field, re-encode in canonical form (AIP-01 §5.2)
-8. Prepend domain separator `ATP-v1.0:` and verify `s.sig` using the matched public key (AIP-01 §4.2, §4.4)
+8. Prepend domain separator `ATP-v{cv}:` (for v1 documents: `ATP-v1:`) and verify `s.sig` using the matched public key (AIP-01 §4.2, §4.4)
 9. If `content.hash` and `content.body` are both present, verify `SHA-256(content.body) == content.hash`
 
 For hash-referenced content without inline `body`, verifiers SHOULD retrieve the content via `uri` and verify the hash separately. This is outside the core verification procedure.
@@ -271,7 +275,8 @@ interface PublicationContent {
 
 /** Publication document */
 interface PublicationDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "pub";
   /** Publisher identity reference */
   from: IdentityRef;

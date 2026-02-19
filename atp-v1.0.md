@@ -35,15 +35,20 @@ ATP specifications follow **semantic versioning** at the major.minor level:
 - **Major** (e.g., v1 → v2): Breaking changes. New domain separator. Documents from different major versions are not cross-compatible.
 - **Minor** (e.g., v1.0 → v1.1): Additive or non-breaking changes. New AIPs added, existing AIPs revised with backwards-compatible amendments.
 
-### 1.3 Domain Separator
+### 1.3 Domain Separator and Version Fields
 
-The domain separator used in signature computation is tied to the **major** version:
+Every ATP document carries two integer version fields:
+
+- **`v`** — the protocol version this document was created under (e.g., `1`)
+- **`cv`** — the minimum compatible protocol version for verification (e.g., `1`)
+
+The domain separator used in signature computation is derived from `cv`:
 
 ```
-ATP-v1:
+ATP-v{cv}:
 ```
 
-All documents signed under any v1.x specification use `ATP-v1:` as the domain separator. A new major version (v2) would introduce `ATP-v2:`. This ensures signatures are never ambiguous across breaking changes.
+For v1.0, all documents have `v: 1` and `cv: 1`, producing the domain separator `ATP-v1:`. A verifier checks `cv <= my_version` to determine if it can correctly process the document. A new major version (v2) would introduce `ATP-v2:`. This ensures signatures are never ambiguous across breaking changes, while allowing forward-compatible documents when possible.
 
 ### 1.4 Relationship to AIPs
 

@@ -95,7 +95,7 @@ This ensures that Final AIPs are stable references. Implementations targeting a 
 
 ### Versioning
 
-Individual AIPs are NOT versioned. The git history serves as the revision record. The protocol version (`v` field in ATP documents, currently `"1.0"`) is independent of AIP numbering and is defined by the set of Final Core AIPs.
+Individual AIPs are NOT versioned. The git history serves as the revision record. The protocol version is defined by two integer fields in ATP documents: `v` (the protocol version the document was created under) and `cv` (the minimum compatible protocol version for verification). The domain separator uses `cv`: `ATP-v{cv}:`. A verifier checks `cv <= my_version` to determine if it can process the document. For v1.0, all documents have `v: 1` and `cv: 1`, and the domain separator is `ATP-v1:`.
 
 ### Normative Language
 
@@ -125,7 +125,8 @@ An identity document establishes an agent's cryptographic identity.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Protocol version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"id"` | Document type |
 | `n` | string | 1–64 chars, `[a-zA-Z0-9 _\-.]` | Agent name (§1.1) |
 | `k` | array | 1+ key objects, no duplicate public keys | Key set (§2) |
@@ -135,7 +136,8 @@ An identity document establishes an agent's cryptographic identity.
 
 ```
 identity
-├─ v: "1.0"
+├─ v: 1
+├─ cv: 1
 ├─ t: "id"
 ├─ n: string (agent name)
 ├─ k: key-object[]
@@ -333,15 +335,17 @@ The `f` field MUST match the fingerprint of exactly one key in the identity's ke
 2. Encode to chosen format:
    - JSON: compact sorted keys, no whitespace, UTF-8 (§5.2)
    - CBOR: deterministic encoding per RFC 8949 §4.2 (§5.2)
-3. Prepend the domain separator: the ASCII bytes `ATP-v1.0:` (9 bytes: `0x4154502d76312e303a`)
-4. Sign the concatenation: `ATP-v1.0:` || encoded_bytes
+3. Prepend the domain separator: `ATP-v{cv}:` where `cv` is the document's compatible version field (for v1 documents: `ATP-v1:`, 7 bytes: `0x4154502d76313a`)
+4. Sign the concatenation: `ATP-v{cv}:` || encoded_bytes
 5. Compute the fingerprint of the signing key (§2.3)
 6. Construct `s` as `{ "f": "<signing key fingerprint>", "sig": "<signature>" }`
 7. Re-encode the complete document for inscription. The re-encoded document MUST use the same encoding (JSON or CBOR) and canonical form as the signed bytes.
 
 #### 4.4 Domain Separator
 
-The domain separator `ATP-v1.0:` (9 ASCII bytes: `0x4154502d76312e303a`) is prepended to the canonical encoded bytes before signing.
+The domain separator is `ATP-v{cv}:` where `cv` is the document's compatible version (`cv`) field. For v1 documents, this is `ATP-v1:` (7 ASCII bytes: `0x4154502d76313a`). The separator is prepended to the canonical encoded bytes before signing.
+
+A verifier checks `cv <= my_version` to determine if it can correctly process and verify the document. This allows future protocol versions to produce documents that older verifiers can still validate, as long as the document's `cv` is within the verifier's supported range.
 
 This prevents cross-protocol signature reuse — a signature produced for an ATP document cannot be valid in any other protocol that does not use the identical prefix. Cross-type reuse within ATP is already prevented by the `t` field being included in the signed payload — different document types produce different bytes.
 
@@ -372,7 +376,8 @@ Creators MUST sign canonical bytes. Inscriptions MAY contain non-canonical encod
 
 | Field | Type | JSON Encoding | CBOR Encoding |
 |-------|------|---------------|---------------|
-| `v`, `t`, `n` | text | UTF-8 string | text string (major type 3) |
+| `v`, `cv` | integer | number | unsigned integer (major type 0) |
+| `t`, `n` | text | UTF-8 string | text string (major type 3) |
 | `vna` | integer | number | unsigned integer (major type 0) |
 | `k` | array | array of key objects | array of maps |
 | `k[].t` | text | UTF-8 string | text string (major type 3) |
@@ -440,7 +445,7 @@ OP_ENDIF
 
 **Content-type:** `application/atp.v1+json` or `application/atp.v1+cbor`
 
-This custom MIME type allows indexers to identify ATP documents by content-type alone without parsing the payload. The version in the MIME type matches the `v` field inside the document.
+This custom MIME type allows indexers to identify ATP documents by content-type alone without parsing the payload. The version number in the MIME type corresponds to the `v` field inside the document (the protocol version the document was created under).
 
 Data chunks are limited to 520 bytes each (Bitcoin script push size limit). Large documents span multiple chunks.
 
@@ -481,9 +486,9 @@ flowchart TD
     A[Input: reveal txid] --> B[Fetch reveal transaction]
     B --> C[Extract inscription payload + content-type]
     C --> D[Decode document as JSON or CBOR]
-    D --> E{v == 1.0 and t == id?}
+    D --> E{v,cv valid ints and cv <= v and t == id?}
     E -- No --> X[Reject]
-    E -- Yes --> F[Extract key array k]
+    E -- Yes --> F["Extract key array k, extract cv"]
     F --> G["Compute identity fingerprint from k[0].p"]
     G --> H[Find key in k where fingerprint matches s.f]
     H --> I{Key found?}
@@ -497,13 +502,13 @@ flowchart TD
 ```
 
 1. Decode document (JSON or CBOR based on content-type)
-2. Verify `v` is `"1.0"` and `t` is `"id"`
+2. Verify `v` and `cv` are valid integers and `cv <= v`. For v1 documents, `v` is `1` and `cv` is `1`. Verify `t` is `"id"`.
 3. Verify `k` is an array with at least one key object. Verify no duplicate public keys.
 4. Compute the identity fingerprint from `k[0].p` per §2.3
 5. Find the key in `k` whose fingerprint matches `s.f`. Reject if no match.
 6. Remove `s` field from document
 7. Re-encode document in canonical form per §5.2. The stored/inscribed document may be pretty-printed or otherwise formatted — verifiers MUST always re-canonicalize before verification.
-8. Prepend domain separator `ATP-v1.0:` to the canonical bytes (§4.4)
+8. Prepend domain separator `ATP-v{cv}:` to the canonical bytes (for v1 documents: `ATP-v1:`) (§4.4)
 9. Verify `s.sig` over the prefixed bytes using the matched public key (§4.2)
 
 #### 8.2 Error Taxonomy
@@ -513,7 +518,7 @@ Verification procedures produce one of the following error categories when a doc
 | Error Code | Description |
 |------------|-------------|
 | `ERROR_MALFORMED_DOCUMENT` | JSON/CBOR parse failure |
-| `ERROR_INVALID_VERSION` | `v` is not `"1.0"` |
+| `ERROR_INVALID_VERSION` | `v` or `cv` is not a valid integer, or `cv > v` |
 | `ERROR_INVALID_TYPE` | `t` is not a recognized document type |
 | `ERROR_MISSING_FIELD` | A required field is absent |
 | `ERROR_INVALID_FIELD_TYPE` | Field value has wrong type (e.g., string where integer expected) |
@@ -530,7 +535,8 @@ Verification procedures produce one of the following error categories when a doc
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "id",
   "n": "Shrike",
   "k": [
@@ -568,7 +574,8 @@ Fingerprint (computed): `base64url_no_pad(sha256(decode_base64url(k[0].p)))` →
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "id",
   "n": "Shrike",
   "k": [
@@ -599,7 +606,8 @@ This identity holds two keys: an Ed25519 key (primary, defines the fingerprint) 
 
 ```
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "id",
   "n": "Shrike",
   "k": [
@@ -698,7 +706,8 @@ type Metadata = Record<string, [string, string][]>;
 
 /** Identity document */
 interface IdentityDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "id";
   /** Agent name (1–64 chars, [a-zA-Z0-9 _\-.]) */
   n: string;

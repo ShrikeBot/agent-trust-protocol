@@ -143,7 +143,8 @@ When an identity is `expired`:
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "id",
   "n": "TempBot",
   "k": [
@@ -166,7 +167,8 @@ This identity expires on 2026-01-01 00:00:00 UTC (Unix timestamp 1767225600). Af
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "super",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -203,7 +205,8 @@ This supersession is inscribed early but doesn't take effect until Unix timestam
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "revoke",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",

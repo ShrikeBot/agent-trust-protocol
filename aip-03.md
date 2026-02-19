@@ -29,7 +29,8 @@ Permanently invalidates an identity.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"revoke"` | Document type |
 | `target` | identity-ref | — | Identity being revoked (`f` + `ref`) |
 | `reason` | string | `"key-compromised"` \| `"defunct"` | Reason for revocation |
@@ -74,7 +75,8 @@ This limits the poison pill attack surface: historical keys can only revoke whil
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "revoke",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -95,7 +97,8 @@ This limits the poison pill attack surface: historical keys can only revoke whil
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "revoke",
   "target": {
     "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
@@ -124,7 +127,7 @@ This limits the poison pill attack surface: historical keys can only revoke whil
 6. Find the key in the full key set whose fingerprint matches `s.f`. Reject if no match.
 7. Check that the key set containing the signing key has not expired (see AIP-04 for expiry evaluation). Reject if expired.
 8. Remove `s` field, re-encode in canonical form (AIP-01 §5.2)
-9. Prepend domain separator `ATP-v1.0:` and verify `s.sig` using the matched public key (AIP-01 §4.2, §4.4)
+9. Prepend domain separator `ATP-v{cv}:` (for v1 documents: `ATP-v1:`) and verify `s.sig` using the matched public key (AIP-01 §4.2, §4.4)
 10. Once verified, the ENTIRE identity chain is permanently invalid — all identities linked by supersession
 
 **Verifiers MUST check for revocations from ALL non-expired keys across ALL identities in a supersession chain before accepting any identity in that chain.**
@@ -208,7 +211,8 @@ type RevocationReason = "key-compromised" | "defunct";
 
 /** Revocation document */
 interface RevocationDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "revoke";
   /** Identity being revoked */
   target: IdentityRef;

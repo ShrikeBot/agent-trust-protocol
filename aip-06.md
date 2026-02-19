@@ -28,7 +28,8 @@ Mutually-signed record of an exchange.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
-| `v` | string | `"1.0"` | Version |
+| `v` | integer | `1` | Protocol version this document was created under |
+| `cv` | integer | `1` | Minimum compatible protocol version for verification |
 | `t` | string | `"rcpt"` | Document type |
 | `p` | array | 2+ party objects, unique fingerprints | Parties (§1.1) |
 | `ex` | object | — | Exchange details (§1.2) |
@@ -109,7 +110,8 @@ Explorers SHOULD display receipt history chronologically and note when receipts 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "rcpt",
   "p": [
     {
@@ -152,7 +154,8 @@ Explorers SHOULD display receipt history chronologically and note when receipts 
 
 ```json
 {
-  "v": "1.0",
+  "v": 1,
+  "cv": 1,
   "t": "rcpt",
   "p": [
     {
@@ -291,7 +294,8 @@ type Outcome = "completed" | "partial" | "cancelled" | "disputed";
 
 /** Receipt document */
 interface ReceiptDocument {
-  v: "1.0";
+  v: 1;
+  cv: 1;
   t: "rcpt";
   /** Parties (2+, unique fingerprints) */
   p: Party[];
