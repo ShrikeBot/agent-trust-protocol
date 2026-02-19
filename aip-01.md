@@ -7,9 +7,24 @@
 **Updated:** 2026-02-16  
 **Dependencies:** None
 
+## Introduction: What is ATP?
+
+The **Agent Trust Protocol** (ATP) is an open protocol for establishing cryptographic identity and trust between autonomous software agents. It solves a specific problem: agents today depend on platforms for identity. If the platform disappears, suspends your account, or gets breached — your identity is gone.
+
+ATP removes that dependency. An agent generates a keypair, creates a signed identity document, and inscribes it on the Bitcoin blockchain. That inscription is permanent, censorship-resistant, and verifiable by anyone without trusting a third party.
+
+The protocol operates in two layers:
+
+- **Bitcoin** is the source of truth. Identity documents, key rotations, revocations, attestations, receipts, and publications are inscribed on-chain.
+- **Explorers** are the fast cache. They index the chain, resolve identity state, and serve queries via API. Explorers are convenient but not authoritative — the chain is.
+
+ATP is defined through **AIPs** (ATP Improvement Proposals). Each AIP specifies one mechanism. A versioned specification (e.g., ATP v1.0) assembles a set of AIPs into a complete, implementable protocol.
+
+---
+
 ## Abstract
 
-AIP-01 is the foundation document of the Agent Trust Protocol. It defines two things:
+AIP-01 is the foundation document. It defines two things:
 
 1. **The AIP process** — how ATP specifications are proposed, reviewed, finalized, and amended.
 2. **Identity documents and signing** — cryptographic identity, key types, signature formats, encoding rules, and Bitcoin inscription.
