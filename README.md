@@ -35,10 +35,6 @@ See [TEMPLATE.md](./TEMPLATE.md) for the AIP template.
 
 - **[atp-cli](https://github.com/atprotocol-org/atp-cli)** — Command-line tools for ATP
 
-## Archive
-
-Pre-v1.0 specifications are preserved in [`archive/`](./archive/).
-
 ## License
 
 MIT
