@@ -915,19 +915,13 @@ interface IdentityDocument {
 
 ## Changelog
 
-### 1.1 (2026-03-13)
-
-- **Breaking:** `s` field changed from single signature to array (one signature per key)
-- **Breaking:** All keys in `k[]` MUST have corresponding signature in `s[]`
-- Added §8.0 Document Identifiers: content-addressed document IDs via SHA-256
-- Added `did` field to document references for content-based addressing
-- Updated verification procedure for multi-signature validation
-- Added error codes: `ERROR_SIGNATURE_COUNT`, `ERROR_MISSING_KEY_SIGNATURE`
-
 ### 1.0 (2026-02-16)
 
 - Initial specification extracted from ATP v1.0 monolithic spec
-- Status: Review (mature, ready for implementation feedback)
+- 2026-03-13: `s` field changed to array (one signature per key proving ownership)
+- 2026-03-13: Added §8.0 Document Identifiers (SHA-256 content-addressed IDs)
+- 2026-03-13: Added `did` field to references for content-based addressing
+- Status: Draft
 
 ---
 

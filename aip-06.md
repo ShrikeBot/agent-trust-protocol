@@ -334,14 +334,10 @@ interface ReceiptDocument {
 
 ## Changelog
 
-### 1.1 (2026-03-13)
-
-- Added `did` field to party references for content-addressed document IDs (AIP-01 §8)
-- Updated examples to include `did` in identity references
-
 ### 1.0 (2026-02-16)
 
 - Initial specification extracted from ATP v1.0 monolithic spec
+- 2026-03-13: Added `did` field to party references (AIP-01 §8)
 - Status: Draft
 
 ---

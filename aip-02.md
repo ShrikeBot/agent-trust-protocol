@@ -397,16 +397,11 @@ interface SupersessionDocument {
 
 ## Changelog
 
-### 1.1 (2026-03-13)
-
-- **Breaking:** `s` array now requires 1 old + n new signatures (n = len(k))
-- All keys in new key set MUST sign to prove ownership
-- Added `did` field to references for content-addressed document IDs (AIP-01 §8)
-- Updated examples to show multi-signature format
-
 ### 1.0 (2026-02-16)
 
 - Initial specification extracted from ATP v1.0 monolithic spec
+- 2026-03-13: `s` array requires 1 old + n new signatures (all new keys sign)
+- 2026-03-13: Added `did` field to references (AIP-01 §8)
 - Status: Draft
 
 ---
