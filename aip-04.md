@@ -38,6 +38,8 @@ ATP supports optional validity windows on a small set of lifecycle documents:
 | Supersession (`t: "super"`) | Yes | Yes |
 | Revocation (`t: "revoke"`) | Yes | No |
 
+<div class="caption">Table 1: Validity Window Field Allowances</div>
+
 For supersession documents:
 - `vnb` applies to the **supersession itself** (scheduled rollover)
 - `vna` applies to the **resulting key set** (the new identity created by the supersession)
@@ -61,6 +63,8 @@ An identity exists in exactly one of the following states at any given chain tim
 | **expired** | `vna` threshold has passed. The identity's authority window has closed. No new documents of any kind may be signed by expired keys. Historical documents signed before expiry remain valid — expiry is not retroactive and does not imply compromise. |
 | **revoked** | A revocation document has taken effect (AIP-03). The identity is permanently dead. No supersession, no recovery. The entire chain is poisoned. |
 | **superseded** | A supersession has taken effect (AIP-02). The old key set is retired. The identity continues under new keys (follow the chain forward). |
+
+<div class="caption">Table 2: Identity States</div>
 
 **Note on `superseded`:** This state describes **intermediate identities in the chain** — prior key sets that have been replaced. When evaluating identity state, explorers walk the supersession chain to the tip and return the tip's state: `active`, `expired`, or `revoked`. The `superseded` state is never the terminal output, because the algorithm always resolves to the current chain head. Explorers SHOULD use `superseded` when displaying the state of historical key sets within a chain.
 
@@ -161,6 +165,8 @@ When an identity is `expired`:
 }
 ```
 
+<div class="caption">Example 1: Identity with Expiry</div>
+
 This identity expires on 2026-01-01 00:00:00 UTC (Unix timestamp 1767225600). After that time, the keys cannot sign new documents, but historical documents signed before expiry remain valid.
 
 ### Example 2: Scheduled Supersession (JSON)
@@ -199,6 +205,8 @@ This identity expires on 2026-01-01 00:00:00 UTC (Unix timestamp 1767225600). Af
 }
 ```
 
+<div class="caption">Example 2: Scheduled Supersession</div>
+
 This supersession is inscribed early but doesn't take effect until Unix timestamp 1740000000. The old identity remains active until then.
 
 ### Example 3: Scheduled Revocation (JSON)
@@ -224,6 +232,8 @@ This supersession is inscribed early but doesn't take effect until Unix timestam
 }
 ```
 
+<div class="caption">Example 3: Scheduled Revocation</div>
+
 This revocation is scheduled for 2026-01-01 00:00:00 UTC. The identity remains active until then, at which point the entire chain dies.
 
 ## Implementation Considerations
@@ -239,6 +249,8 @@ def compute_mtp(block_height, blockchain):
     timestamps = [block.time for block in blocks]
     return sorted(timestamps)[5]  # median of 11 values
 ```
+
+<div class="caption">Example 4: MTP Calculation (Python)</div>
 
 For blocks near genesis (height < 10), use all available blocks.
 
@@ -315,6 +327,8 @@ interface RevocationDocument {
   vnb?: UnixTimestamp;
 }
 ```
+
+<div class="caption">Example 5: TypeScript Interface</div>
 
 ## References
 
