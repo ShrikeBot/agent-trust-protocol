@@ -136,7 +136,7 @@ An identity document establishes an agent's cryptographic identity.
 | `t` | string | `"id"` | Document type |
 | `n` | string | 1–64 chars, `[a-zA-Z0-9 _\-.]` | Agent name (§1.1) |
 | `k` | array | 1+ key objects, no duplicate public keys | Key set (§2) |
-| `s` | signature | `{ f, sig }` — single signature object | Signature (§4) |
+| `s` | array | `[{ f, sig }, ...]` — one signature per key | Signatures (§4) |
 | `m?` | object | collections of `[key, value]` tuples | Structured metadata (§3) |
 | `vna?` | integer | Unix seconds | Valid-not-after (expiry) for this identity's key set (see AIP-04) |
 
@@ -156,7 +156,8 @@ identity
 ├─ m?: metadata-object
 │  └─ <collection>: [key, value][]
 ├─ vna?: integer (optional expiry)
-└─ s: { f, sig }
+└─ s: signature[]
+   └─ s[i]: { f, sig } (one per key in k[])
 ```
 
 <div class="caption">Figure 2: Identity Document Structure</div>
@@ -340,9 +341,15 @@ All signatures in ATP use a structured format that identifies the signing key:
 
 <div class="caption">Table 9: Signature Object Fields</div>
 
-For identity documents, `s` is a single `{ f, sig }` object.
+For identity documents, `s` is an array of `{ f, sig }` objects — one signature per key in the key set `k[]`. This proves ownership of all keys at identity creation time.
 
-The `f` field MUST match the fingerprint of exactly one key in the identity's key set. Verifiers MUST reject signatures where `s.f` does not match any key in `k`.
+**Multi-signature requirement:**
+- `len(s)` MUST equal `len(k)`
+- Each `s[i].f` MUST match the fingerprint of exactly one key in `k[]`
+- All keys in `k[]` MUST have a corresponding signature in `s[]`
+- Duplicate fingerprints in `s[]` are rejected
+
+Verifiers MUST reject identity documents where any key in `k[]` lacks a corresponding valid signature.
 
 #### 4.2 Signature Algorithms
 
@@ -451,14 +458,17 @@ Creators MUST sign canonical bytes. Inscriptions MAY contain non-canonical encod
 
 ### 6.0 Platform-Agnostic References (CAIP-2)
 
-ATP uses [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) chain identifiers to locate documents on any supported platform. A **location reference** (`ref`) is an object with two fields:
+ATP uses [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) chain identifiers to locate documents on any supported platform. A **location reference** (`ref`) is an object with the following fields:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `net` | string | CAIP-2 chain identifier |
-| `id` | string | Platform-specific document identifier |
+| `id` | string | Platform-specific document identifier (e.g., TXID) |
+| `did` | string | Document ID — SHA-256 of signed document (§8.1) |
 
 <div class="caption">Table 13: Location Reference Fields</div>
+
+Either `id` or `did` (or both) MUST be present. When both are present, `did` is authoritative — verifiers MUST compute the document ID after fetching and verify it matches the declared `did`.
 
 **Common CAIP-2 values:**
 
@@ -479,7 +489,8 @@ For Bitcoin, `id` is the inscription TXID (64 hex characters, display format).
   "f": "<fingerprint>",
   "ref": {
     "net": "bip122:000000000019d6689c085ae165831e93",
-    "id": "<inscription TXID>"
+    "id": "<inscription TXID>",
+    "did": "<document ID (SHA-256)>"
   }
 }
 ```
@@ -488,7 +499,8 @@ For Bitcoin, `id` is the inscription TXID (64 hex characters, display format).
 
 - `f` — Identity fingerprint (from `k[0]` — the WHO)
 - `ref.net` — Where the document lives (the WHERE)
-- `ref.id` — Document identifier on that platform (the WHAT)
+- `ref.id` — TXID on that platform (location hint)
+- `ref.did` — Document ID (content-addressed, authoritative)
 
 The key type (`t`) is not included in references — verifiers fetch the document via `ref` to determine the key type.
 
@@ -550,43 +562,102 @@ If multiple identity documents that include the same public key are observed, ex
 2. Within the same block, earlier transaction position wins.
 3. If transaction position is unavailable, break ties by lexicographic TXID (ascending).
 
-### 8.0 Verification
+### 8.0 Document Identifiers
 
-#### 8.1 Identity Verification Procedure
+Every ATP document has a unique, content-derived identifier computed from the complete signed document.
+
+#### 8.1 Document ID Computation
+
+```
+doc_id = base64url_no_pad(sha256(canonical(signed_document)))
+```
+
+The document ID is computed over the **complete signed document** including the `s` field. This ensures:
+- The ID commits to the authorized artifact, not just unsigned content
+- Manipulation attacks are prevented (unsigned content cannot claim an ID)
+- Each unique signed document has a unique ID
+
+**Procedure:**
+1. Take the complete document including all signatures (`s`)
+2. Encode in canonical form (§5.2)
+3. Compute SHA-256 hash of the canonical bytes
+4. Encode as base64url without padding
+
+Result: 43 characters (256 bits).
+
+#### 8.2 Genesis Identity ID
+
+For identity documents, the document ID of the first (genesis) identity inscription is the **permanent identity identifier**. This ID:
+- Identifies the agent across supersessions
+- Is content-addressed and verifiable
+- Does not change when keys rotate via supersession
+
+The genesis identity ID replaces the "genesis fingerprint" concept — instead of deriving identity from the primary key's fingerprint, identity is derived from the complete signed genesis document.
+
+#### 8.3 Document References
+
+Documents MAY reference other documents using either:
+- **TXID** (location-based): `"id": "<64-char hex txid>"` — points to inscription location
+- **Document ID** (content-based): `"did": "<43-char base64url>"` — points to document content
+
+When both are present, the document ID (`did`) is authoritative. Verifiers SHOULD:
+1. Fetch the document via TXID
+2. Compute its document ID
+3. Verify the computed ID matches the declared `did`
+
+This allows location hints while maintaining content-addressability.
+
+<div class="caption">Table 15: Document Reference Fields</div>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | TXID of the inscription (64 hex chars) |
+| `did` | string | Document ID (43 base64url chars, SHA-256) |
+
+Either or both may be present. If both, `did` is authoritative.
+
+### 9.0 Verification
+
+#### 9.1 Identity Verification Procedure
 
 ```mermaid
 flowchart TD
     A[Input: reveal txid] --> B[Fetch reveal transaction]
     B --> C[Extract inscription payload + content-type]
     C --> D[Decode document as JSON or CBOR]
-    D --> E{v,cv valid ints and cv <= v and t == id?}
+    D --> E{v,cv valid and t == id?}
     E -- No --> X[Reject]
-    E -- Yes --> F["Extract key array k, extract cv"]
-    F --> G["Compute identity fingerprint from k[0].p"]
-    G --> H[Find key in k where fingerprint matches s.f]
-    H --> I{Key found?}
-    I -- No --> X
-    I -- Yes --> J[Remove s field]
-    J --> K[Re-encode unsigned document in same format]
-    K --> L[Verify s.sig over encoded bytes using matched key]
-    L --> M{Signature valid?}
-    M -- No --> X
-    M -- Yes --> N[Accept]
+    E -- Yes --> F["Extract key array k, signature array s"]
+    F --> G{len s == len k?}
+    G -- No --> X
+    G -- Yes --> H[Remove s field, canonicalize]
+    H --> I[For each key k_i]
+    I --> J{Find s_j where s_j.f matches k_i fingerprint?}
+    J -- No --> X
+    J -- Yes --> K[Verify s_j.sig over unsigned doc using k_i]
+    K --> L{Signature valid?}
+    L -- No --> X
+    L -- Yes --> M{More keys?}
+    M -- Yes --> I
+    M -- No --> N[Accept]
 ```
 
 <div class="caption">Figure 4: Identity Verification Procedure</div>
 
 1. Decode document (JSON or CBOR based on content-type)
-2. Verify `v` and `cv` are valid major.minor strings (e.g., `"1.0"`), `cv >= "1.0"`, and `cv <= v`. If the major component of `cv` > verifier's major version, reject (§4.5). For v1 documents, `v` is `"1.0"` and `cv` is `"1.0"`. Verify `t` is `"id"`.
+2. Verify `v` and `cv` are valid major.minor strings (e.g., `"1.0"`), `cv >= "1.0"`, and `cv <= v`. If the major component of `cv` > verifier's major version, reject (§4.5). Verify `t` is `"id"`.
 3. Verify `k` is an array with at least one key object. Verify no duplicate public keys.
-4. Compute the identity fingerprint from `k[0].p` per §2.3
-5. Find the key in `k` whose fingerprint matches `s.f`. Reject if no match.
-6. Remove `s` field from document
-7. Re-encode document in canonical form per §5.2. The stored/inscribed document may be pretty-printed or otherwise formatted — verifiers MUST always re-canonicalize before verification.
-8. Prepend domain separator `ATP-v{cv}:` to the canonical bytes (for v1 documents: `ATP-v1:`) (§4.4)
-9. Verify `s.sig` over the prefixed bytes using the matched public key (§4.2)
+4. Verify `s` is an array with `len(s) == len(k)`. Each key must have exactly one signature.
+5. Remove `s` field from document
+6. Re-encode document in canonical form per §5.2. The stored/inscribed document may be pretty-printed or otherwise formatted — verifiers MUST always re-canonicalize before verification.
+7. Prepend domain separator `ATP-v{cv}:` to the canonical bytes (for v1 documents: `ATP-v1:`) (§4.4)
+8. For each key `k[i]` in the key set:
+   - Find the signature `s[j]` where `s[j].f` matches the fingerprint of `k[i]`
+   - Verify `s[j].sig` over the prefixed unsigned bytes using `k[i]` (§4.2)
+   - Reject if no matching signature or if verification fails
+9. Compute the document ID (§8.1) for indexing and reference purposes
 
-#### 8.2 Error Taxonomy
+#### 9.2 Error Taxonomy
 
 Verification procedures produce one of the following error categories when a document is rejected. Implementations SHOULD use these codes (or equivalent) to communicate failure reasons.
 
@@ -598,7 +669,9 @@ Verification procedures produce one of the following error categories when a doc
 | `ERROR_MISSING_FIELD` | A required field is absent |
 | `ERROR_INVALID_FIELD_TYPE` | Field value has wrong type (e.g., string where integer expected) |
 | `ERROR_INVALID_SIGNATURE` | Signature verification failed |
-| `ERROR_KEY_NOT_FOUND` | `s.f` does not match any key in the signer's key set |
+| `ERROR_KEY_NOT_FOUND` | `s[i].f` does not match any key in the signer's key set |
+| `ERROR_SIGNATURE_COUNT` | `len(s)` does not equal `len(k)` for identity documents |
+| `ERROR_MISSING_KEY_SIGNATURE` | A key in `k[]` has no corresponding signature in `s[]` |
 | `ERROR_REFERENCE_NOT_FOUND` | `ref.id` inscription not found on-chain |
 | `ERROR_INVALID_REFERENCE` | `ref` points to a non-ATP inscription or wrong document type |
 | `ERROR_DUPLICATE_KEY` | Same public key appears in multiple identities (§7.4) |
@@ -638,10 +711,12 @@ Verification procedures produce one of the following error categories when a doc
       ["lightning", "shrike@getalby.com"]
     ]
   },
-  "s": {
-    "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
-    "sig": "obLD1OX2argcnQHyojTF1uf4qbCx0uP0pbbH2Onwobs9NNWG-Hg8nQHyojTF1uf4qbCx0uP0pbbH2Onwobs"
-  }
+  "s": [
+    {
+      "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
+      "sig": "obLD1OX2argcnQHyojTF1uf4qbCx0uP0pbbH2Onwobs9NNWG-Hg8nQHyojTF1uf4qbCx0uP0pbbH2Onwobs"
+    }
+  ]
 }
 ```
 
@@ -672,16 +747,22 @@ Fingerprint (computed): `base64url_no_pad(sha256(decode_base64url(k[0].p)))` →
       ["twitter", "@Shrike_Bot"]
     ]
   },
-  "s": {
-    "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
-    "sig": "obLD1OX2argcnQHyojTF1uf4qbCx0uP0pbbH2Onwobs9NNWG-Hg8nQHyojTF1uf4qbCx0uP0pbbH2Onwobs"
-  }
+  "s": [
+    {
+      "f": "xK3jL9mN1qQ9pE4tU6u1fGRjwNWwtnQd4fG4eISeI6s",
+      "sig": "obLD1OX2argcnQHyojTF1uf4qbCx0uP0pbbH2Onwobs9NNWG-Hg8nQHyojTF1uf4qbCx0uP0pbbH2Onwobs"
+    },
+    {
+      "f": "pQ7kM3nR5sT8vW2xY4zA6bC9dE1fG3hI5jK7lN0oP2q",
+      "sig": "<4,391 base64url characters — 3,293-byte ML-DSA-65 signature>"
+    }
+  ]
 }
 ```
 
 <div class="caption">Example 4: Multi-Key Identity (JSON)</div>
 
-This identity holds two keys: an Ed25519 key (primary, defines the fingerprint) and a Dilithium key (secondary, for post-quantum resilience). The signature was produced by the Ed25519 key (as identified by `s.f`), but the Dilithium key could have been used instead.
+This identity holds two keys: an Ed25519 key (primary, defines the fingerprint) and a Dilithium key (secondary, for post-quantum resilience). Both keys MUST sign the identity document to prove ownership — each signature in `s[]` corresponds to a key in `k[]`.
 
 ### Example 3: Single-Key Ed25519 Identity (CBOR diagnostic notation)
 
@@ -702,11 +783,13 @@ This identity holds two keys: an Ed25519 key (primary, defines the fingerprint) 
     "links": [["twitter", "@Shrike_Bot"], ["github", "ShrikeBot"]],
     "wallets": [["bitcoin", "bc1qewqtd8vyr3fpwa8su43ld97tvcadsz4wx44gqn"]]
   },
-  "s": {
-    "f": h'c4ade32fd98dd6a43da44e2d53abb57c
-          6463c0d5b0b6741de1f1b878849e23ab',
-    "sig": h'<64 bytes ed25519 signature>'
-  }
+  "s": [
+    {
+      "f": h'c4ade32fd98dd6a43da44e2d53abb57c
+            6463c0d5b0b6741de1f1b878849e23ab',
+      "sig": h'<64 bytes ed25519 signature>'
+    }
+  ]
 }
 ```
 
@@ -789,6 +872,16 @@ interface Signature {
 /** Structured metadata: collections of [key, value] tuples */
 type Metadata = Record<string, [string, string][]>;
 
+/** Document reference (supports both TXID and document ID) */
+interface DocumentRef {
+  /** Network identifier (CAIP-2 format) */
+  net: string;
+  /** TXID of the inscription (64 hex chars) */
+  id?: string;
+  /** Document ID (43 base64url chars, SHA-256 of signed doc) */
+  did?: string;
+}
+
 /** Identity document */
 interface IdentityDocument {
   v: string;
@@ -798,7 +891,8 @@ interface IdentityDocument {
   n: string;
   /** Key set (1+ keys, no duplicates; k[0] is primary) */
   k: KeyObject[];
-  s: Signature;
+  /** Signatures (one per key in k[], proving ownership of all keys) */
+  s: Signature[];
   /** Structured metadata (optional) */
   m?: Metadata;
   /** Valid-not-after: identity expiry (Unix seconds, optional) */
@@ -820,6 +914,15 @@ interface IdentityDocument {
 - [Ordinals Inscription Protocol](https://docs.ordinals.com/)
 
 ## Changelog
+
+### 1.1 (2026-03-13)
+
+- **Breaking:** `s` field changed from single signature to array (one signature per key)
+- **Breaking:** All keys in `k[]` MUST have corresponding signature in `s[]`
+- Added §8.0 Document Identifiers: content-addressed document IDs via SHA-256
+- Added `did` field to document references for content-based addressing
+- Updated verification procedure for multi-signature validation
+- Added error codes: `ERROR_SIGNATURE_COUNT`, `ERROR_MISSING_KEY_SIGNATURE`
 
 ### 1.0 (2026-02-16)
 
