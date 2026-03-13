@@ -23,7 +23,7 @@ Publications provide a flexible content container with strong attribution, optio
 
 ## Specification
 
-### 1. Publication Document Structure
+### 1.0 Publication Document Structure
 
 A general-purpose signed document for broadcasting content.
 
@@ -80,7 +80,7 @@ This enables:
 - **Integrity verification** — Detect if off-chain content has been modified since publication
 - **Denial-of-service resistance** — Large files don't bloat the inscription; only the hash is stored on-chain
 
-### 2. Maximum Document Size
+### 2.0 Maximum Document Size
 
 Explorers SHOULD reject publication documents exceeding **512 KB**. This advisory limit keeps indexing costs predictable while accommodating substantial inline content.
 

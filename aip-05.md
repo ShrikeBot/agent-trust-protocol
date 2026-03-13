@@ -27,7 +27,7 @@ Attestation revocation allows attestors to withdraw endorsements when circumstan
 
 ## Specification
 
-### 1. Attestation Document Structure
+### 1.0 Attestation Document Structure
 
 One agent vouching for another.
 
@@ -87,7 +87,7 @@ The absence of attestations from reputable identities is itself the negative sig
 
 Applications SHOULD reject attestations with `ctx` values that express negative sentiment or warnings. Explorers MAY implement policies to filter abusive attestations.
 
-### 2. Attestation Revocation Document Structure
+### 2.0 Attestation Revocation Document Structure
 
 Revokes a previously issued attestation.
 
@@ -121,7 +121,7 @@ This ensures attestors who follow good key hygiene (destroying old keys after ro
 
 Verifiers MUST walk the supersession chain to confirm the revoking key has authority.
 
-### 3. Expiry vs. Revocation
+### 3.0 Expiry vs. Revocation
 
 Attestations can expire (`vna`) or be revoked:
 

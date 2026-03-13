@@ -26,7 +26,7 @@ Without bridging, an agent's ATP reputation and Nostr activity are disconnected.
 
 ## Specification
 
-### 1. Nostr → ATP Claim (NIP-39 Pattern)
+### 1.0 Nostr → ATP Claim (NIP-39 Pattern)
 
 [NIP-39](https://github.com/nostr-protocol/nips/blob/master/39.md) defines external identity claims via `kind:10011` events with `i` tags. The pattern is:
 
@@ -77,7 +77,7 @@ To verify a Nostr → ATP claim:
 
 **Note:** This proves the Nostr pubkey **claims** the ATP identity. It does NOT prove the ATP identity **controls** the Nostr pubkey unless the reverse claim (ATP → Nostr) also exists.
 
-### 2. ATP → Nostr Claim (Metadata Convention)
+### 2.0 ATP → Nostr Claim (Metadata Convention)
 
 Agents SHOULD publish their Nostr npub (public key in bech32 encoding) in ATP metadata using the `m.keys` collection with key `nostr`.
 
@@ -123,7 +123,7 @@ To verify an ATP → Nostr claim:
 
 **Note:** This proves the ATP identity **claims** the Nostr pubkey. It does NOT prove the Nostr pubkey **controls** the ATP identity unless the reverse claim (Nostr → ATP) also exists.
 
-### 3. Bidirectional Verification
+### 3.0 Bidirectional Verification
 
 For **strong cross-protocol identity**, agents SHOULD publish claims in **both directions**:
 
@@ -137,7 +137,7 @@ When both claims exist and are valid:
 
 Verifiers SHOULD check both directions before treating the link as authoritative.
 
-### 4. Trust Transfer
+### 4.0 Trust Transfer
 
 Once a bidirectional link is established:
 
@@ -146,7 +146,7 @@ Once a bidirectional link is established:
 - **Payment flow** — Nostr Lightning Zaps (NIP-57) can be sent to ATP-verified agents with confidence in recipient identity
 - **DVM reputation** — Nostr Data Vending Machines (NIP-90) can anchor their reputation in ATP receipts
 
-### 5. Chain Continuity Across Supersessions
+### 5.0 Chain Continuity Across Supersessions
 
 When an ATP identity supersedes (AIP-02), the genesis fingerprint remains constant but the current fingerprint changes. Nostr claims SHOULD reference the **genesis fingerprint**, not the current fingerprint.
 

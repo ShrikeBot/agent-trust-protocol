@@ -17,7 +17,7 @@ This specification is the authoritative reference for what "ATP v1.0" means. Imp
 
 ---
 
-## 1. Protocol Versioning
+## 1.0 Protocol Versioning
 
 ### 1.1 Why Version?
 
@@ -64,7 +64,7 @@ The specification does not replace AIPs. It assembles them. Each spec version is
 
 ---
 
-## 2. ATP v1.0 Composition
+## 2.0 ATP v1.0 Composition
 
 ### 2.1 Required AIPs
 
@@ -85,13 +85,13 @@ Implementations MUST support all AIPs listed below to claim ATP v1.0 conformance
 
 ---
 
-## 3. Conformance
+## 3.0 Conformance
 
 An implementation claiming ATP v1.0 conformance MUST implement all required AIPs (AIP-01 through AIP-08) at the specified revision levels. There are no optional AIPs — v1.0 is the complete protocol.
 
 ---
 
-## 4. Signature Scheme
+## 4.0 Signature Scheme
 
 All ATP v1.0 documents use the following signature scheme:
 
@@ -114,7 +114,7 @@ Any change to the following constitutes a **major version bump** and a new domai
 
 ---
 
-## 5. Document Types
+## 5.0 Document Types
 
 ATP v1.0 defines the following document types:
 
@@ -150,7 +150,7 @@ These are explorer advisories. The protocol itself does not enforce size limits 
 
 ---
 
-## 6. Implementation Requirements
+## 6.0 Implementation Requirements
 
 ### 6.1 Key Types
 
@@ -177,7 +177,7 @@ Implementations MUST fail hard on verification errors. Silent failures or best-e
 
 ---
 
-## 7. Protocol Evolution
+## 7.0 Protocol Evolution
 
 ### 7.1 Adding AIPs
 
@@ -200,7 +200,7 @@ An AIP may be deprecated in a minor spec release. Deprecated AIPs remain valid f
 
 ---
 
-## 8. Changelog
+## 8.0 Changelog
 
 ### v1.0 (February 2026)
 

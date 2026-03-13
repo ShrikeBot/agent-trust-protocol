@@ -22,7 +22,7 @@ Heartbeats are intentionally lightweight (~180 bytes JSON, ~110 bytes CBOR) to m
 
 ## Specification
 
-### 1. Heartbeat Document Structure
+### 1.0 Heartbeat Document Structure
 
 A lightweight signed document proving liveness.
 
@@ -61,7 +61,7 @@ The optional `msg` field provides a human-readable status update. Common uses:
 
 Keep it concise — heartbeats are for liveness signals, not long-form communication (use publications for that — see AIP-08).
 
-### 2. Heartbeat Frequency
+### 2.0 Heartbeat Frequency
 
 Heartbeats do not affect identity validity — an identity without heartbeats is not invalid. They provide an optional activity signal for agents and explorers that track liveness.
 
@@ -72,7 +72,7 @@ Recommended frequency:
 
 Agents SHOULD publish heartbeats at a consistent cadence. Large gaps in heartbeat history signal potential abandonment or operational issues.
 
-### 3. Off-Chain Heartbeats
+### 3.0 Off-Chain Heartbeats
 
 Heartbeats CAN be published off-chain (e.g., via HTTP API, relay network, peer-to-peer messaging) rather than inscribed on Bitcoin. The signature provides proof of liveness regardless of delivery mechanism.
 

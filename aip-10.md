@@ -24,7 +24,7 @@ The `m.links.a2a` metadata field is a lightweight convention that makes ATP iden
 
 ## Specification
 
-### 1. Metadata Convention
+### 1.0 Metadata Convention
 
 Agents that provide A2A services SHOULD publish their A2A endpoint base URL in the `m.links` metadata collection with key `a2a`.
 
@@ -56,7 +56,7 @@ Agents that provide A2A services SHOULD publish their A2A endpoint base URL in t
 
 The `a2a` value MUST be a valid HTTPS URL. It is the **base URL** for the A2A service — the endpoint where the agent's A2A API is hosted.
 
-### 2. Agent Card Crawling
+### 2.0 Agent Card Crawling
 
 Per the A2A protocol, agent capabilities are published at `<base-url>/.well-known/agent.json`.
 
@@ -97,7 +97,7 @@ When an explorer or agent encounters an identity with `m.links.a2a` metadata:
 
 (This is a simplified example — refer to the [A2A specification](https://a2a-protocol.org/) for the full agent card schema.)
 
-### 3. Identity Verification
+### 3.0 Identity Verification
 
 The key security property: **the A2A endpoint is signed by the ATP identity**.
 
@@ -113,7 +113,7 @@ Agents consuming A2A services SHOULD:
 2. Verify the `atp_fingerprint` in the agent card matches the ATP identity's genesis fingerprint
 3. Check the ATP identity's trust signals (attestations, receipts, age) before delegating tasks
 
-### 4. Capability Indexing
+### 4.0 Capability Indexing
 
 Explorers SHOULD index A2A capabilities to enable discovery queries like:
 
@@ -126,7 +126,7 @@ Recommended indexing:
 - **Service type** → Agents grouped by service category
 - **Trust threshold** → Filter agents by ATP trust score
 
-### 5. Off-Chain Updates
+### 5.0 Off-Chain Updates
 
 A2A agent cards can change without updating the ATP identity (e.g., adding a new capability, changing contact info). This is normal — ATP anchors the identity and endpoint; the agent card is dynamic.
 

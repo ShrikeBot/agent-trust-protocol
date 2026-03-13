@@ -125,7 +125,7 @@ AIP-01 is the foundation all other AIPs build upon.
 
 ## Specification
 
-### 1. Identity Document Structure
+### 1.0 Identity Document Structure
 
 An identity document establishes an agent's cryptographic identity.
 
@@ -175,7 +175,7 @@ Explorers and applications SHOULD:
 - Display the fingerprint alongside the name
 - Warn users when multiple identities share the same normalized name
 
-### 2. Keys and Key Sets
+### 2.0 Keys and Key Sets
 
 #### 2.1 Key Types
 
@@ -254,7 +254,7 @@ Recommended convention:
 
 This keeps documents reproducible across implementations while preserving an explicit "primary key" choice.
 
-### 3. Structured Metadata (`m`)
+### 3.0 Structured Metadata (`m`)
 
 The optional `m` field provides extensible identity metadata. It is an object where each key names a **collection** and each value is an array of `[key, value]` string tuples.
 
@@ -318,7 +318,7 @@ To improve interoperability, the following conventional keys have recommended fo
 
 Explorers SHOULD index metadata collections for search and discovery — e.g., reverse lookup by GPG fingerprint, finding agents by handle, or listing agents that accept payments.
 
-### 4. Signature Format and Creation
+### 4.0 Signature Format and Creation
 
 #### 4.1 Signature Structure
 
@@ -408,7 +408,7 @@ This avoids unnecessary breakage. A v1 explorer continues to process documents i
 - The domain separator uses the major version integer from `cv`: `ATP-v{M}:`.
 - For ATP v1.0, all documents have `v: "1.0"` and `cv: "1.0"`.
 
-### 5. Encoding
+### 5.0 Encoding
 
 Documents MAY be encoded as JSON (RFC 8259) or CBOR (RFC 8949).
 
@@ -449,7 +449,7 @@ Creators MUST sign canonical bytes. Inscriptions MAY contain non-canonical encod
 
 <div class="caption">Table 12: Binary Field Encoding</div>
 
-### 6. Platform-Agnostic References (CAIP-2)
+### 6.0 Platform-Agnostic References (CAIP-2)
 
 ATP uses [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) chain identifiers to locate documents on any supported platform. A **location reference** (`ref`) is an object with two fields:
 
@@ -492,7 +492,7 @@ For Bitcoin, `id` is the inscription TXID (64 hex characters, display format).
 
 The key type (`t`) is not included in references — verifiers fetch the document via `ref` to determine the key type.
 
-### 7. Bitcoin Inscription
+### 7.0 Bitcoin Inscription
 
 ATP documents are inscribed using the Ordinals inscription protocol.
 
@@ -550,7 +550,7 @@ If multiple identity documents that include the same public key are observed, ex
 2. Within the same block, earlier transaction position wins.
 3. If transaction position is unavailable, break ties by lexicographic TXID (ascending).
 
-### 8. Verification
+### 8.0 Verification
 
 #### 8.1 Identity Verification Procedure
 

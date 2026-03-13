@@ -22,7 +22,7 @@ Receipts are **irrevocable by design** — they cannot be deleted or retracted a
 
 ## Specification
 
-### 1. Receipt Document Structure
+### 1.0 Receipt Document Structure
 
 Mutually-signed record of an exchange.
 
@@ -81,7 +81,7 @@ The optional `val` field records the exchange value in satoshis. Useful for econ
 
 **Note:** A disputed receipt is still a valid receipt — it's an honest record that the parties couldn't agree on the outcome. Explorers SHOULD weight disputed receipts differently when computing trust scores.
 
-### 2. Multi-Party Signature Procedure
+### 2.0 Multi-Party Signature Procedure
 
 Signatures MUST appear in the same order as parties. Each `s[i].f` MUST match the fingerprint of a key in the corresponding party's key set (`p[i]`). Each party signs with any one of their keys — the `f` field identifies which one.
 
@@ -102,7 +102,7 @@ In practice, this means:
 
 For 3+ party receipts, collect signatures sequentially or use a coordinator.
 
-### 3. Irrevocability
+### 3.0 Irrevocability
 
 **Receipts are irrevocable.** There is no receipt revocation mechanism. A receipt is a historical record of an exchange that occurred — it cannot be retracted, disputed after the fact, or deleted. Both parties accepted the terms by signing. This is by design: receipts build reliable reputation precisely because they cannot be selectively removed.
 

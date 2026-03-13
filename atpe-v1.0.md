@@ -15,7 +15,7 @@ ATP v1.0 defines the protocol: documents, signatures, encoding, identity lifecyc
 
 ---
 
-## 1. Purpose and Scope
+## 1.0 Purpose and Scope
 
 ### 1.1 Why ATPe?
 
@@ -48,7 +48,7 @@ ATPe does not replace or supersede any AIPs. It assembles them into an implement
 
 ---
 
-## 2. Versioning
+## 2.0 Versioning
 
 ### 2.1 Version Scheme
 
@@ -69,7 +69,7 @@ Each ATPe release declares which ATP versions it is compatible with. ATPe v1.0 r
 
 ---
 
-## 3. ATPe v1.0 Composition
+## 3.0 ATPe v1.0 Composition
 
 ### 3.1 Assembled AIPs
 
@@ -109,7 +109,7 @@ The following AIPs are not part of ATPe but are designed to interoperate with it
 
 ---
 
-## 4. Conformance
+## 4.0 Conformance
 
 ### 4.1 Conformance Levels
 
@@ -128,7 +128,7 @@ Multiple explorer implementations with different policies, scoring methodologies
 
 ---
 
-## 5. Explorer Responsibilities Summary
+## 5.0 Explorer Responsibilities Summary
 
 The following is a summary of responsibilities defined in [AIP-09](/aips/aip-09). See AIP-09 for the complete normative specification.
 
@@ -154,7 +154,7 @@ The following is a summary of responsibilities defined in [AIP-09](/aips/aip-09)
 
 ---
 
-## 6. API Conventions
+## 6.0 API Conventions
 
 ATPe v1.0 defines conventional HTTP API patterns in [AIP-09](/aips/aip-09) §2. Key endpoints:
 
@@ -173,7 +173,7 @@ These are conventions, not mandates. Explorers MAY extend or adapt these pattern
 
 ---
 
-## 7. Chain State and Fork Handling
+## 7.0 Chain State and Fork Handling
 
 See [AIP-09](/aips/aip-09) §3 and §7 for the complete specification.
 
@@ -186,7 +186,7 @@ See [AIP-09](/aips/aip-09) §3 and §7 for the complete specification.
 
 ---
 
-## 8. Security Model
+## 8.0 Security Model
 
 See [AIP-09](/aips/aip-09) §8 and the Security Considerations section for the complete specification.
 
@@ -199,7 +199,7 @@ See [AIP-09](/aips/aip-09) §8 and the Security Considerations section for the c
 
 ---
 
-## 9. Document Size Advisories
+## 9.0 Document Size Advisories
 
 | Type | Advisory Maximum |
 |------|-----------------|
@@ -214,7 +214,7 @@ The protocol itself does not enforce size limits — Bitcoin transaction size is
 
 ---
 
-## 10. Protocol Evolution
+## 10.0 Protocol Evolution
 
 ### 10.1 Adding Explorer AIPs
 
@@ -230,7 +230,7 @@ When ATP releases a new major version (e.g., ATP v2.0), ATPe will release a corr
 
 ---
 
-## 11. Changelog
+## 11.0 Changelog
 
 ### ATPe v1.0 (February 2026)
 

@@ -23,7 +23,7 @@ The poison pill model serves as a dead man's switch: if a superseded key is late
 
 ## Specification
 
-### 1. Revocation Document Structure
+### 1.0 Revocation Document Structure
 
 Permanently invalidates an identity.
 
@@ -48,7 +48,7 @@ Permanently invalidates an identity.
 
 <div class="caption">Table 2: Revocation Reasons</div>
 
-### 2. Poison Pill Model
+### 2.0 Poison Pill Model
 
 **Revocation kills the entire chain.** A revocation signed by any non-expired key from any identity in the supersession chain — current or historical — kills the ENTIRE identity chain. Not just from that key onwards: the whole thing. The identity is completely dead. The owner must create a new identity from scratch.
 
@@ -59,7 +59,7 @@ With multi-key identities, any single non-expired key from any identity in the c
 
 A revocation is final. Once inscribed, the entire identity chain is permanently invalid. Verifiers MUST check for revocations against all non-expired keys from all identities in a supersession chain before accepting any identity as valid.
 
-### 3. Signing Authority
+### 3.0 Signing Authority
 
 The signature (`s.f`) MUST match the fingerprint of a key from:
 - The **current** identity (latest in the supersession chain), OR
@@ -67,7 +67,7 @@ The signature (`s.f`) MUST match the fingerprint of a key from:
 
 Explorers/verifiers MUST walk the supersession chain backward to the genesis identity, collecting ALL keys from ALL identities in the chain (primary and secondary, current and historical) to build the **full key set**. A revocation is valid if signed by any non-expired key in this full key set.
 
-### 4. Expiry Constraint
+### 4.0 Expiry Constraint
 
 Keys from expired identity key sets cannot sign revocations (see AIP-04 §5.7.7). Once an identity's `vna` threshold has passed, its keys lose all authority — including revocation authority.
 

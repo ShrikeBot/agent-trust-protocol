@@ -23,7 +23,7 @@ Validity windows also enable **scheduled supersessions** and **scheduled revocat
 
 ## Specification
 
-### 1. Validity Window Fields
+### 1.0 Validity Window Fields
 
 ATP supports optional validity windows on a small set of lifecycle documents:
 
@@ -44,7 +44,7 @@ For supersession documents:
 - `vnb` applies to the **supersession itself** (scheduled rollover)
 - `vna` applies to the **resulting key set** (the new identity created by the supersession)
 
-### 2. Canonical Time Source: Bitcoin Median Time Past (MTP)
+### 2.0 Canonical Time Source: Bitcoin Median Time Past (MTP)
 
 
 For Bitcoin (`ref.net = bip122:000000000019d6689c085ae165831e93`), implementations MUST use **Median Time Past (MTP)** of the block that confirms the inscription.
@@ -53,7 +53,7 @@ For Bitcoin (`ref.net = bip122:000000000019d6689c085ae165831e93`), implementatio
 
 Explorers/verifiers MUST NOT fall back to local wall-clock time for `vnb`/`vna` evaluation. If chain time cannot be determined (e.g., missing block context), the document's active/expired status is **unknown**.
 
-### 3. Identity States
+### 3.0 Identity States
 
 An identity exists in exactly one of the following states at any given chain time:
 
@@ -73,7 +73,7 @@ Both are terminal states — the identity can no longer sign new documents. The 
 - **Expiry** means the authority window closed; historical documents signed before expiry remain fully trustworthy.
 - **Revocation** means the keys may have been compromised; historical documents are suspect because the point of compromise may predate the revocation.
 
-### 4. Document Activation Rules
+### 4.0 Document Activation Rules
 
 Documents with `vnb` or `vna` follow these activation rules. Two time references are used:
 
@@ -94,7 +94,7 @@ Rules:
 **Identity (`t: "id"`):**
 - If `vna` is present: the identity expires when `MTP(B) > vna`.
 
-### 5. State Evaluation Algorithm
+### 5.0 State Evaluation Algorithm
 
 Given an identity's genesis fingerprint, an evaluator computes the current state by processing all lifecycle documents in **strict block order**. Within a single block, documents are ordered by transaction position (miner-determined).
 
@@ -129,7 +129,7 @@ Given an identity's genesis fingerprint, an evaluator computes the current state
 
 6. **Return** `{ state, current_keys, vna_threshold, genesis_fingerprint }`.
 
-### 6. Constraints on Expired Key Sets
+### 6.0 Constraints on Expired Key Sets
 
 When an identity is `expired`:
 

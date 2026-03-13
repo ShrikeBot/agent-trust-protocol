@@ -22,7 +22,7 @@ Without supersession, identity evolution requires creating a new identity from s
 
 ## Specification
 
-### 1. Supersession Document Structure
+### 1.0 Supersession Document Structure
 
 Replaces an existing identity with a new one. The supersession document IS the new identity — it contains the new name, keys, and metadata alongside a reference to the old identity being superseded.
 
@@ -57,7 +57,7 @@ When a document references an identity via `ref`, the resolved inscription may h
 
 <div class="caption">Table 2: Supersession Reasons</div>
 
-### 2. Dual Signature Requirement
+### 2.0 Dual Signature Requirement
 
 The `s` array contains exactly 2 `{ f, sig }` objects in **canonical order**:
 
@@ -75,7 +75,7 @@ This ordering is normative. Implementations MUST place the old identity's signat
 
 For metadata-only updates where the old and new key sets are identical, both signatures may be from the same key. For deterministic signature algorithms (Ed25519, secp256k1), the signatures will be identical — this is expected and valid. Verifiers MUST verify each signature independently but MUST NOT reject solely because `s[0]` and `s[1]` are identical when the signing keys overlap.
 
-### 3. Permanence and Uniqueness
+### 3.0 Permanence and Uniqueness
 
 **Supersession is permanent.** Once an identity is superseded, the old identity is dead. It cannot issue any further lifecycle documents — no second supersession, no revocation, nothing.
 
@@ -83,7 +83,7 @@ Only the **FIRST** valid supersession from a given identity is canonical. First 
 
 This prevents fork attacks where an attacker with a compromised old key tries to create a competing supersession chain. The first supersession to confirm wins; all others are ignored.
 
-### 4. Genesis Fingerprint Continuity
+### 4.0 Genesis Fingerprint Continuity
 
 The **genesis fingerprint** — the fingerprint of the primary key (`k[0]`) in the original identity document — is the canonical, permanent identifier for an identity across all lifecycle events.
 
@@ -98,7 +98,7 @@ Explorers SHOULD use the genesis fingerprint as the canonical identifier for an 
 
 When resolving an identity, explorers walk the supersession chain forward from the genesis document to the latest valid supersession to determine the current name, keys, and metadata.
 
-### 5. Metadata-Only Updates
+### 5.0 Metadata-Only Updates
 
 To update metadata (name change, socials, etc.) without changing keys, use reason `"metadata-update"`. In this case, the old and new key arrays are the same.
 
@@ -112,7 +112,7 @@ Example: An agent wants to change their display name from "Shrike" to "Stalker" 
 
 For Ed25519, `s[0]` and `s[1]` will be identical if signed by the same key. This is valid.
 
-### 6. Key Addition and Removal
+### 6.0 Key Addition and Removal
 
 **Adding a post-quantum key:**
 Supersede with an expanded `k` array (reason `"key-addition"`). The old Ed25519 key can remain `k[0]` (preserving the identity fingerprint if carried forward). The new Dilithium key becomes `k[1]`.
@@ -120,7 +120,7 @@ Supersede with an expanded `k` array (reason `"key-addition"`). The old Ed25519 
 **Removing a compromised key:**
 Supersede with that key removed (reason `"key-removal"`). The supersession can be signed by any remaining uncompromised key from the old identity and any key from the new identity.
 
-### 7. Key Uniqueness Constraint
+### 7.0 Key Uniqueness Constraint
 
 A given public key MUST NOT appear in more than one identity's `k` array (AIP-01 §7.4). When superseding, the NEW key set's keys must not appear in any other identity (except the chain being superseded if keys are carried forward).
 

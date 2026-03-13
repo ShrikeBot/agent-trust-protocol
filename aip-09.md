@@ -25,7 +25,7 @@ This AIP is less prescriptive than core protocol AIPs — it defines expected fu
 
 ## Specification
 
-### 1. Core Responsibilities
+### 1.0 Core Responsibilities
 
 An ATP explorer MUST:
 
@@ -44,7 +44,7 @@ Explorers SHOULD (optional but recommended):
 10. **Crawl A2A cards** — Fetch `/.well-known/agent.json` from `m.links.a2a` endpoints (AIP-10)
 11. **Cache publications** — Index and serve publication content (AIP-08)
 
-### 2. API Patterns
+### 2.0 API Patterns
 
 Explorers SHOULD provide HTTP APIs for querying ATP data. Common patterns:
 
@@ -134,7 +134,7 @@ GET /search?gpg=<fingerprint>
 
 Explorers MAY implement full-text search, metadata filtering, or semantic search.
 
-### 3. Chain State Verification
+### 3.0 Chain State Verification
 
 Explorers MUST implement the state evaluation algorithm from AIP-04 §5 to determine identity state (`active`, `expired`, `revoked`, `superseded`).
 
@@ -147,7 +147,7 @@ For each identity, track:
 
 Explorers SHOULD re-evaluate state on every new block (handle reorgs correctly).
 
-### 4. A2A Integration
+### 4.0 A2A Integration
 
 When an identity has `m.links.a2a` metadata (AIP-10), explorers SHOULD:
 
@@ -166,7 +166,7 @@ GET /agents/search?capability=<capability-name>
 
 See AIP-10 for A2A integration details.
 
-### 5. Trust Scoring
+### 5.0 Trust Scoring
 
 Explorers SHOULD compute multi-factor trust scores combining:
 
@@ -179,7 +179,7 @@ Explorers SHOULD compute multi-factor trust scores combining:
 
 Trust scoring is implementation-specific. Explorers SHOULD document their scoring methodology.
 
-### 6. Revocation Propagation
+### 6.0 Revocation Propagation
 
 When a revocation is confirmed, explorers MUST:
 
@@ -189,7 +189,7 @@ When a revocation is confirmed, explorers MUST:
 4. Display revocation reason and timestamp
 5. Retain historical documents for auditability (revoked ≠ deleted)
 
-### 7. Multi-Network Support and Fork Handling
+### 7.0 Multi-Network Support and Fork Handling
 
 #### 7.1 Chain and Fork Resolution
 
@@ -214,7 +214,7 @@ When serving documents, explorers MUST:
 - NOT silently treat documents from one network as if they were from another
 - Provide network filtering in the UI and API
 
-### 8. Rate Limiting and Abuse Prevention
+### 8.0 Rate Limiting and Abuse Prevention
 
 Explorers SHOULD implement:
 - **Rate limiting** — Prevent API abuse
