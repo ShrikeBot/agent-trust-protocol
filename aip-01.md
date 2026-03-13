@@ -144,8 +144,8 @@ An identity document establishes an agent's cryptographic identity.
 
 ```
 identity
-├─ v: 1
-├─ cv: 1
+├─ v: "1.0"
+├─ cv: "1.0"
 ├─ t: "id"
 ├─ n: string (agent name)
 ├─ k: key-object[]
